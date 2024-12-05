@@ -20,7 +20,7 @@ import java.util.List;
 import static java.util.Collections.EMPTY_LIST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static pro.sky.telegrambot.constant.NotificationMessage.*;
+import static pro.sky.telegrambot.service.service_message.NotificationMessage.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTaskServiceTest {
@@ -42,6 +42,7 @@ class NotificationTaskServiceTest {
 
     @BeforeEach
     void init() {
+        service.telegramBotCommandsInit();
         message = mock(Message.class);
         chat = mock(Chat.class);
         currentDateTime = LocalDateTime.now();
@@ -62,7 +63,7 @@ class NotificationTaskServiceTest {
 
         String actual = service.responseText(message);
 
-        assertThat(actual).isEqualTo(LIST);
+        assertThat(actual).isEqualTo(messageBuilder(MENU_ELEMENT_1, MENU_ELEMENT_2));
     }
 
     @Test
@@ -73,7 +74,7 @@ class NotificationTaskServiceTest {
 
         String actual = service.responseText(message);
 
-        assertThat(actual).isEqualTo(MESSAGE(WELCOME, MENU));
+        assertThat(actual).isEqualTo(messageBuilder(WELCOME, MENU));
     }
 
     @Test
@@ -84,7 +85,7 @@ class NotificationTaskServiceTest {
 
         String actual = service.responseText(message);
 
-        assertThat(actual).isEqualTo(TEXT_INFO);
+        assertThat(actual).isEqualTo(INFO_TEXT);
     }
 
     @Test
@@ -147,7 +148,7 @@ class NotificationTaskServiceTest {
         String actual = service.responseText(message);
 
         verify(extractor).extractDateTime(messageText);
-        assertThat(actual).isEqualTo(TEXT_INFO);
+        assertThat(actual).isEqualTo(INFO_TEXT);
     }
 
     @Test

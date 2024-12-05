@@ -1,47 +1,52 @@
 package pro.sky.telegrambot.service;
 
 import com.pengrad.telegrambot.model.Message;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.model.NotificationTask;
 import pro.sky.telegrambot.repository.NotificationRepository;
+import pro.sky.telegrambot.service.command.*;
 import pro.sky.telegrambot.service.extractor.DataExtractor;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-import static pro.sky.telegrambot.constant.NotificationMessage.*;
+import static java.util.Map.entry;
+import static pro.sky.telegrambot.service.service_message.NotificationMessage.*;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationTaskService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationTaskService.class);
     private final NotificationRepository notificationRepository;
     private final DataExtractor dataExtractor;
+
+    private Map<String, Command> telegramBotCommands;
+
+    @PostConstruct
+    public void telegramBotCommandsInit() {
+        telegramBotCommands = Map.ofEntries(
+                entry(INFO, new Info()),
+                entry(MENU, new Menu()),
+                entry(NOTIFICATIONS, new Notification(this)),
+                entry(START, new Start())
+        );
+    }
 
     public String responseText(Message message) {
         long chatId = message.chat().id();
         String messageText = message.text();
-        switch (messageText) {
-            case MENU -> {
-                return LIST;
-            }
-            case START -> {
-                return MESSAGE(WELCOME, MENU);
-            }
-            case INFO -> {
-                return TEXT_INFO;
-            }
-            case NOTIFICATIONS -> {
-                return getAllByChatId(chatId);
-            }
+
+        Command command = telegramBotCommands.get(messageText);
+        if (command != null) {
+            return command.createReplyMessage(message);
         }
+
         LocalDateTime localDateTime = dataExtractor.extractDateTime(messageText);
-        LOGGER.info("Notification date, time is: '{}'", localDateTime);
-        if (localDateTime.isBefore(LocalDateTime.now())) return TEXT_INFO;
+        if (localDateTime.isBefore(LocalDateTime.now())) return INFO_TEXT;
+
         String taskText = dataExtractor.extractText(messageText);
         return createTask(localDateTime, taskText, chatId);
     }
@@ -63,7 +68,7 @@ public class NotificationTaskService {
         notificationRepository.delete(notification);
     }
 
-    private String getAllByChatId(long chatId) {
+    public String getAllByChatId(long chatId) {
         List<NotificationTask> notifications = notificationRepository.findAllByChatId(chatId);
         if (notifications.isEmpty()) return NO_NOTIFICATIONS;
         return tasksList(notifications);
