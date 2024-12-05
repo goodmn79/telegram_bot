@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.service.NotificationTaskService;
 
@@ -28,16 +27,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @PostConstruct
     public void init() {
         telegramBot.setUpdatesListener(this);
-    }
-
-
-    @Scheduled(cron = "1 0/1 * * * *")
-    public void scheduledSearch() {
-        LOGGER.info("Scheduled search");
-        service.getCurrentTimeTasks().forEach(task -> {
-            telegramBot.execute(new SendMessage(task.getChatId(), task.getText()));
-            service.deleteNotification(task);
-        });
     }
 
     @Override

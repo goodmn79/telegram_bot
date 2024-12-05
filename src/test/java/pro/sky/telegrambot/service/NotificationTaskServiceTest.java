@@ -85,7 +85,7 @@ class NotificationTaskServiceTest {
 
         String actual = service.responseText(message);
 
-        assertThat(actual).isEqualTo(INFO_TEXT);
+        assertThat(actual).isEqualTo(messageBuilder(INFO_TEXT, MENU));
     }
 
     @Test
@@ -113,7 +113,7 @@ class NotificationTaskServiceTest {
         String actual = service.responseText(message);
 
         verify(repository).findAllByChatId(chatId);
-        assertThat(actual).isEqualTo(NO_NOTIFICATIONS);
+        assertThat(actual).isEqualTo(messageBuilder(NO_NOTIFICATIONS, MENU));
     }
 
     @Test
@@ -133,7 +133,7 @@ class NotificationTaskServiceTest {
         verify(repository).save(notificationTask);
         verify(extractor).extractDateTime(messageText);
         verify(extractor).extractText(messageText);
-        assertThat(actual).isEqualTo(SUCCESSFULLY_CREATED);
+        assertThat(actual).isEqualTo(messageBuilder(SUCCESSFULLY_CREATED, MENU));
     }
 
     @Test
@@ -148,7 +148,7 @@ class NotificationTaskServiceTest {
         String actual = service.responseText(message);
 
         verify(extractor).extractDateTime(messageText);
-        assertThat(actual).isEqualTo(INFO_TEXT);
+        assertThat(actual).isEqualTo(messageBuilder(INFO_TEXT, MENU));
     }
 
     @Test

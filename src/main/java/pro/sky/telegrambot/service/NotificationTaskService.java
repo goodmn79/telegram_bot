@@ -45,7 +45,7 @@ public class NotificationTaskService {
         }
 
         LocalDateTime localDateTime = dataExtractor.extractDateTime(messageText);
-        if (localDateTime.isBefore(LocalDateTime.now())) return INFO_TEXT;
+        if (localDateTime.isBefore(LocalDateTime.now())) return messageBuilder(INFO_TEXT, MENU);
 
         String taskText = dataExtractor.extractText(messageText);
         return createTask(localDateTime, taskText, chatId);
@@ -57,7 +57,7 @@ public class NotificationTaskService {
                         .setLocalDateTime(taskDateTime)
                         .setText(text)
                         .setChatId(chatId));
-        return SUCCESSFULLY_CREATED;
+        return messageBuilder(SUCCESSFULLY_CREATED, MENU);
     }
 
     public Collection<NotificationTask> getCurrentTimeTasks() {
@@ -70,7 +70,7 @@ public class NotificationTaskService {
 
     public String getAllByChatId(long chatId) {
         List<NotificationTask> notifications = notificationRepository.findAllByChatId(chatId);
-        if (notifications.isEmpty()) return NO_NOTIFICATIONS;
+        if (notifications.isEmpty()) return messageBuilder(NO_NOTIFICATIONS, MENU);
         return tasksList(notifications);
     }
 
